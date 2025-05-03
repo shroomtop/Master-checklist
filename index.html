@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Master CS Skill Checklist</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen p-4">
+
+  <!-- Header -->
+  <header class="mb-6 text-center">
+    <h1 class="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-red-400 via-purple-400 to-green-400 bg-clip-text text-transparent drop-shadow-lg">
+      Master CS Skill Checklist
+    </h1>
+    <p class="mt-2 text-gray-600 dark:text-gray-400">Select the topics you’ve mastered.</p>
+  </header>
+
+  <!-- Search & Checklist -->
+  <div class="space-y-4">
+    <input id="search" type="text" placeholder="Filter skills…"
+      class="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm placeholder-gray-500 transition" />
+
+    <div id="checklist" class="space-y-4 max-h-[65vh] overflow-y-auto">
+      <!-- dynamic content -->
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="fixed bottom-4 right-4 flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2 p-3 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-lg">
+    <span id="count" class="font-semibold">0 selected</span>
+    <button id="copyBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-md">
+      Copy Selected
+    </button>
+    <button id="clearBtn" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg shadow-md">
+      Clear All
+    </button>
+  </div>
+
+  <script type="module">
+    // Data model
+    const categories = [
+      { category: "Programming Languages & Paradigms", items: [
+          "Procedural (C, Pascal, Fortran)",
+          "Object-Oriented (Java, C++, Python, Swift)",
+          "Functional (Haskell, OCaml, F#, Scheme)",
+          "Logic-based (Prolog, Datalog)",
+          "Declarative (SQL, HTML)",
+          "Concurrent/Parallel (Erlang, Go, Rust)",
+          "Esoteric (Brainfuck, Malbolge, Whitespace)",
+          "Metaprogramming (Lisp macros, C++ templates)"
+        ]
+      },
+      { category: "Computer Science Core", items: [
+          "Data Structures",
+          "Algorithms",
+          "Time & Space Complexity",
+          "Recursion & Backtracking",
+          "Memory Management"
+        ]
+      },
+      { category: "Architecture & Hardware", items: [
+          "Assembly (x86, ARM)",
+          "Instruction Sets",
+          "Microarchitecture",
+          "Computer Organization",
+          "Digital Logic"
+        ]
+      },
+      { category: "Operating Systems", items: [
+          "Processes & Threads",
+          "Virtual Memory",
+          "File Systems",
+          "Scheduling Algorithms",
+          "IPC (pipes, semaphores)",
+          "Kernel Modules"
+        ]
+      },
+      { category: "Networking", items: [
+          "OSI Model",
+          "TCP/IP Stack",
+          "DNS, DHCP, HTTP",
+          "Sockets (UDP/TCP)",
+          "NAT, Routing",
+          "VPNs, Load Balancers"
+        ]
+      },
+      { category: "Web Development", items: [
+          "HTML5 / CSS3",
+          "JavaScript & DOM",
+          "REST / GraphQL APIs",
+          "WebSockets",
+          "React / Vue / Svelte",
+          "Flask / Express / Django",
+          "Web Security (CORS, XSS, CSRF)"
+        ]
+      },
+      { category: "Databases & Storage", items: [
+          "Relational DBs (MySQL, Postgres)",
+          "NoSQL (Mongo, Redis)",
+          "Indexing / Joins / ACID",
+          "Transactions",
+          "CAP Theorem"
+        ]
+      },
+      { category: "Software Engineering", items: [
+          "Design Patterns",
+          "SOLID Principles",
+          "Refactoring Techniques",
+          "Testing & TDD",
+          "CI/CD Pipelines",
+          "Git / Version Control"
+        ]
+      },
+      { category: "DevOps & SysAdmin", items: [
+          "Bash / Zsh scripting",
+          "Docker / Ansible / Terraform",
+          "System Monitoring (htop/top)",
+          "Linux CLI",
+          "WSL / VMs",
+          "Cloud (AWS, GCP, Azure)"
+        ]
+      },
+      { category: "Cybersecurity", items: [
+          "Symmetric / Asymmetric Encryption",
+          "Hashing (SHA, MD5, bcrypt)",
+          "Digital Signatures / PKI",
+          "Exploits (SQLi, XSS, RCE)",
+          "Reverse Engineering",
+          "CTF / Forensics / Stego"
+        ]
+      },
+      { category: "AI & Machine Learning", items: [
+          "Supervised / Unsupervised / Deep Learning",
+          "Neural Networks (CNN, RNN, Transformers)",
+          "NLP (LLMs, Tokenization)",
+          "Computer Vision (OpenCV, YOLO)",
+          "Reinforcement Learning",
+          "Model Metrics (AUC, F1, etc.)"
+        ]
+      },
+      { category: "Mathematics for CS", items: [
+          "Discrete Math",
+          "Linear Algebra",
+          "Calculus",
+          "Probability & Statistics",
+          "Number Theory",
+          "Combinatorics"
+        ]
+      },
+      { category: "Formal Methods & Theory", items: [
+          "Automata Theory",
+          "Compiler Design (Lexing, Parsing, IR)",
+          "Lambda Calculus",
+          "Computability & Complexity",
+          "Type Theory (Hindley–Milner)",
+          "Formal Verification (Coq, Z3)"
+        ]
+      },
+      { category: "Embedded / Systems", items: [
+          "RTOS",
+          "Microcontrollers (STM32, Arduino)",
+          "Bare-metal C",
+          "Memory-mapped I/O",
+          "Interrupts / Timers",
+          "SPI / I2C / UART"
+        ]
+      },
+      { category: "Game Development", items: [
+          "Game Loop / Event Systems",
+          "Physics Engines",
+          "2D / 3D Graphics (OpenGL, WebGL)",
+          "AI (FSMs, pathfinding)",
+          "Audio & FX Engines",
+          "Level Design / Scene Graphs"
+        ]
+      },
+      { category: "Tools & Ecosystem", items: [
+          "IDEs (VSCode, JetBrains)",
+          "Package Managers (npm, pip, cargo)",
+          "Build Systems (Make, CMake)",
+          "Terminal Tools (tmux, curl, wget)",
+          "API Clients (Postman, HTTPie)"
+        ]
+      },
+      { category: "Prompt Engineering", items: [
+          "Tokenization / Embeddings",
+          "Instruction Tuning / RLHF",
+          "System vs User Prompts",
+          "Compression (PACO, entropy)",
+          "Chain-of-Thought / Tree-of-Thought",
+          "Agent Architectures"
+        ]
+      }
+    ];
+
+    // References
+    const checklistEl = document.getElementById('checklist');
+    const searchEl    = document.getElementById('search');
+    const countEl     = document.getElementById('count');
+
+    // Render function
+    function render() {
+      const filter = searchEl.value.toLowerCase();
+      checklistEl.innerHTML = '';
+      categories.forEach(sec => {
+        const wrapper = document.createElement('details');
+        wrapper.className = 'p-1 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-2xl';
+        const summary = document.createElement('summary');
+        summary.className = 'px-3 py-2 font-semibold cursor-pointer bg-white/20 dark:bg-gray-800/20 rounded-xl';
+        const count = sec.items.filter(i => i.toLowerCase().includes(filter)).length;
+        summary.textContent = `${sec.category} (${count})`;
+        wrapper.append(summary);
+
+        const grid = document.createElement('div');
+        grid.className = 'mt-2 p-3 bg-white/20 dark:bg-gray-800/20 rounded-xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 drop-shadow-lg';
+        sec.items.forEach(item => {
+          if (!item.toLowerCase().includes(filter)) return;
+          const label = document.createElement('label');
+          label.className = 'flex items-center space-x-2';
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.value = item;
+          cb.onchange = updateCount;
+          label.append(cb, document.createTextNode(item));
+          grid.append(label);
+        });
+        wrapper.append(grid);
+        checklistEl.append(wrapper);
+      });
+      updateCount();
+    }
+
+    // Count update
+    function updateCount() {
+      const n = document.querySelectorAll('#checklist input:checked').length;
+      countEl.textContent = `${n} selected`;
+    }
+
+    // Copy & Clear handlers
+    document.getElementById('copyBtn').onclick = () => {
+      const arr = [...document.querySelectorAll('#checklist input:checked')].map(x => x.value);
+      navigator.clipboard.writeText(JSON.stringify(arr, null, 2));
+    };
+    document.getElementById('clearBtn').onclick = () => {
+      document.querySelectorAll('#checklist input').forEach(cb => cb.checked = false);
+      updateCount();
+    };
+
+    // Search filter
+    searchEl.oninput = render;
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
